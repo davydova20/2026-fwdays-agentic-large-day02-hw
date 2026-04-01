@@ -1,0 +1,29 @@
+---
+description: "Applies when editing Excalidraw canvas rendering, scene math, and export paths."
+globs:
+  - "**/packages/excalidraw/renderer/**/*.ts"
+  - "**/packages/excalidraw/scene/**/*.ts"
+  - "**/packages/excalidraw/tests/scene/**/*.ts"
+alwaysApply: false
+---
+
+# Canvas & scene rendering
+
+## Context
+
+The `renderer/` and `scene/` packages drive drawing to the canvas, coordinate transforms, scrolling/zoom, and exports. Regressions here show up as visual glitches, incorrect exports, or jank. This rule keeps changes aligned with existing helpers and performance expectations—without repeating `data-layer` persistence rules or generic component-only UI conventions.
+
+## Rule
+
+- Reuse existing helpers (`renderer/helpers`, scene utilities) instead of duplicating transform, snap, or round-rect logic.
+- Respect device pixel ratio and canvas backing-store size when reading dimensions or scaling; keep drawing and hit-testing consistent with the rest of the pipeline.
+- Prefer synchronous work on the render path only when necessary; DO NOT add heavy allocations or repeated DOM queries inside hot loops.
+- NEVER assume canvas width/height or CSS size without the same scaling rules the rest of the file uses (`devicePixelRatio`, zoom, etc.).
+- AVOID introducing new global mutable render state; thread state through parameters or existing scene/renderer patterns.
+- AVOID `any` / `@ts-ignore` to bypass `CanvasRenderingContext2D` or scene types—narrow or extend types properly.
+
+## How to verify
+
+1. Smoke the affected flow in the app (pan/zoom, create/edit elements, export if `scene/export` or export-related code changed).
+2. Run targeted tests: `yarn test` with a filter for `packages/excalidraw` scene/renderer tests when those areas changed.
+3. Quick scan: no empty error handling around canvas operations where failures should surface, and no new obvious per-frame work that could block the main thread.

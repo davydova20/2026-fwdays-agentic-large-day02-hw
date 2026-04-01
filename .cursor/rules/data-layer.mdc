@@ -1,0 +1,29 @@
+---
+description: "Applies when editing data-layer modules (serialization, storage, synchronization)."
+globs:
+  - "**/packages/**/data/**/*.ts"
+  - "**/excalidraw-app/data/**/*.ts"
+alwaysApply: false
+---
+
+# Data layer (`data/`)
+
+## Context
+
+Code under `data/` owns persistence formats, read/write paths, storage adapters, and synchronization. Mistakes here cause data loss or corruption and hard-to-debug production issues. This rule keeps changes focused on correct types, clear module boundaries, and predictable error handling—without duplicating general UI rules.
+
+## Rule
+
+- Export the public API through `index.ts` where the module already does so; keep implementation details local.
+- Type persisted shapes explicitly; accompany format changes with versioning or migration when the codebase already supports that.
+- Handle errors explicitly (network, quota, invalid JSON): log or propagate in a way that callers can act on.
+- DO NOT put secrets (API keys, tokens) in code that ships in the client bundle unless the project already has an established pattern for it.
+- NEVER swallow errors with an empty `catch` or hide failed persistence without signaling upstream.
+- AVOID mixing unrelated responsibilities in one file (e.g. pure serialization + layout or global UI state).
+- AVOID `any` and `@ts-ignore` as a shortcut around types for persisted data.
+
+## How to verify
+
+1. Confirm new fields/formats are typed and aligned with existing `restore` / `encode` / storage flows.
+2. Run relevant tests (`yarn test` or a targeted run for the changed `data/` module).
+3. Quick pass: no empty `catch` blocks, no accidental secrets in touched files.

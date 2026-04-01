@@ -344,6 +344,8 @@ export { Button } from "./components/Button";
 export { Footer };
 export { MainMenu };
 export { Ellipsify } from "./components/Ellipsify";
+export { HtmlLinkBlock } from "./components/HtmlLinkBlock";
+export { HtmlLinkBlock134 } from "./components/HtmlLinkBlock134";
 export {
   useEditorInterface,
   useStylesPanelMode,

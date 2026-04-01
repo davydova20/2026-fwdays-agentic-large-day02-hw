@@ -1,0 +1,30 @@
+---
+description: "XSS prevention rules for DOM manipulation and URL handling"
+globs: packages/**/*.ts,packages/**/*.tsx,excalidraw-app/**/*.ts,excalidraw-app/**/*.tsx
+alwaysApply: false
+---
+
+# XSS Prevention
+
+## innerHTML / dangerouslySetInnerHTML
+
+- Avoid `innerHTML` and `dangerouslySetInnerHTML` in new code
+- Existing uses are limited to inserting **self-generated SVG** (`svg.outerHTML`) — do NOT use them with user-supplied strings
+- If you must inject HTML, sanitize first with DOMPurify or equivalent
+
+## URL handling
+
+- All user-supplied URLs MUST pass through `normalizeLink()` / `toValidURL()` from `@excalidraw/common` (`packages/common/src/url.ts`)
+- `toValidURL` already uses `@braintree/sanitize-url` — do NOT bypass it with raw string concatenation
+- Links that fail URL parsing must fall back to `about:blank`, not to the original string
+
+## General
+
+- Never use `eval()`, `new Function()`, or `document.write()`
+- Never interpolate user input into `<script>` tags or inline event handlers
+
+## How to verify
+
+1. Search the diff for `innerHTML`, `dangerouslySetInnerHTML`, `eval(`, `new Function`, `document.write` — only allow patterns that match the exceptions above (e.g. self-generated SVG).
+2. For any new URL surface, confirm it flows through `normalizeLink()` / `toValidURL()` and that invalid URLs become `about:blank` (not raw user strings).
+3. Manually exercise links and any rich content in the affected UI; run relevant tests if the change touches shared URL or sanitization helpers.

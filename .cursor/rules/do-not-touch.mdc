@@ -1,0 +1,22 @@
+---
+description: "Protected files that should not be modified"
+globs: "packages/excalidraw/**"
+alwaysApply: true
+---
+
+# Protected Files
+
+NEVER modify these files without explicit approval:
+
+- `packages/excalidraw/scene/Renderer.ts` — render pipeline
+- `packages/excalidraw/data/restore.ts` — file format compat
+- `packages/excalidraw/actions/manager.tsx` — action system
+- `packages/excalidraw/types.ts` — core types
+
+## How to verify
+
+If you must change a protected file (only with explicit approval):
+
+1. Map call sites and data flow so the impact on render, actions, and file format is fully understood.
+2. Run the full test suite for the workspace; fix any regressions before merging.
+3. Complete manual QA on core flows (edit, save/load, collaboration if applicable) touched by the change.
