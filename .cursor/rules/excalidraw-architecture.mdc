@@ -9,13 +9,13 @@ alwaysApply: false
 ## State Management
 
 - Custom state via actionManager — NOT Redux/Zustand/MobX
-- State updates: actionManager.dispatch() ONLY
+- State updates: use `actionManager.executeAction()` for registered editor actions (see `packages/excalidraw/actions/manager.tsx`). Use React `setState` / hooks only for **local component UI state** where existing components already do.
 - State type: AppState (packages/excalidraw/types.ts)
 
 ## Rendering
 
 - Canvas 2D rendering — NOT React DOM for drawing
-- Render pipeline: Scene → renderScene() → canvas context
+- **Renderer API** (`packages/excalidraw/renderer/`): `renderStaticScene` (see `staticScene.ts`) draws the main scene content to the static canvas; `renderInteractiveScene` (see `interactiveScene.ts`) draws interactive overlays on the interactive canvas (selection, transform handles, collaboration cursors, and similar transient UI). The codebase may wrap static passes with `renderStaticSceneThrottled` where throttling is already used.
 - DO NOT use react-konva, fabric.js, pixi.js
 
 ## Dependencies
@@ -25,7 +25,7 @@ alwaysApply: false
 
 ## How to verify
 
-1. Confirm state changes go through `actionManager.dispatch()` and types align with `AppState` / existing actions — no parallel global stores.
-2. Confirm drawing changes still use the canvas pipeline (scene → `renderScene` / related APIs), not new React-DOM or canvas abstraction libraries.
+1. Confirm editor state changes go through `actionManager.executeAction()` (not a fake `dispatch()` API) and types align with `AppState` / existing actions; local UI may use `setState` as in surrounding code — no parallel global stores (Redux/Zustand/MobX).
+2. Confirm drawing changes still use the canvas pipeline (`renderStaticScene`, `renderInteractiveScene`, or other modules under `packages/excalidraw/renderer/`), not new React-DOM or canvas abstraction libraries.
 3. If dependencies changed: list new packages and approval; grep for `packages/utils` alternatives before adding externals.
 4. Run `yarn test` / build for the touched packages after substantive edits.

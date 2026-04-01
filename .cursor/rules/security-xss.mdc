@@ -1,6 +1,10 @@
 ---
 description: "XSS prevention rules for DOM manipulation and URL handling"
-globs: packages/**/*.ts,packages/**/*.tsx,excalidraw-app/**/*.ts,excalidraw-app/**/*.tsx
+globs:
+  - "**/packages/**/*.ts"
+  - "**/packages/**/*.tsx"
+  - "**/excalidraw-app/**/*.ts"
+  - "**/excalidraw-app/**/*.tsx"
 alwaysApply: false
 ---
 

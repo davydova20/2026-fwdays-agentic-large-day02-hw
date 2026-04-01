@@ -1,5 +1,9 @@
 # AGENTS.md
 
+## Project Overview
+
+Excalidraw is an open-source virtual whiteboard for sketching diagrams and handwriting, shipped as a library and a full web app. The primary audience is developers embedding the editor and contributors working in this monorepo.
+
 ## Project Structure
 
 Excalidraw is a **monorepo** with a clear separation between the core library and the application:
@@ -9,19 +13,34 @@ Excalidraw is a **monorepo** with a clear separation between the core library an
 - **`packages/`** - Core packages: `@excalidraw/common`, `@excalidraw/element`, `@excalidraw/math`, `@excalidraw/utils`
 - **`examples/`** - Integration examples (NextJS, browser script)
 
-## Development Workflow
+## Tech Stack
 
-1. **Package Development**: Work in `packages/*` for editor features
-2. **App Development**: Work in `excalidraw-app/` for app-specific features
-3. **Testing**: Always run `yarn test:update` before committing
-4. **Type Safety**: Use `yarn test:typecheck` to verify TypeScript
+- **Runtime / UI:** React, TypeScript (strict)
+- **App bundling:** Vite (see `excalidraw-app/`)
+- **Library builds:** esbuild (see `scripts/buildPackage.js` and package `build:esm` scripts)
+- **Monorepo:** Yarn workspaces (`package.json` `workspaces`)
+- **Tests / lint:** Vitest, ESLint, Prettier (see root `package.json` scripts)
+
+## Conventions
+
+- **Layout:** Work in `packages/*` for shared editor code; in `excalidraw-app/` for app-only features; respect existing file naming (kebab-case utilities, PascalCase components) as in `.cursor/rules/conventions.mdc`.
+- **Quality gates:** Before committing substantive changes, run `yarn test:typecheck` and `yarn test:code` from the repo root. Use `yarn test` (Vitest) for relevant packages. Run `yarn test:update` only when intentionally updating snapshots.
+- **Types:** Avoid `any` and `@ts-ignore` unless unavoidable; align with strict TypeScript settings.
+
+## Do-Not-Touch / Constraints
+
+- **Monorepo root:** Do not restructure workspaces or root tooling without team agreement (`package.json`, `yarn.lock`, shared configs).
+- **`packages/*`:** Treat published package APIs as stable; avoid breaking exports without a version strategy.
+- **Protected files (no edits without explicit approval):** See `.cursor/rules/do-not-touch.mdc` — includes `packages/excalidraw/scene/Renderer.ts`, `packages/excalidraw/data/restore.ts`, `packages/excalidraw/actions/manager.tsx`, `packages/excalidraw/types.ts`.
+- **`docs/memory/`:** Durable agent/human context; update deliberately when behavior or decisions change (see `docs/memory/README.md`).
 
 ## Development Commands
 
-
 ```bash
-yarn test:typecheck  # TypeScript type checking
-yarn test:update     # Run all tests (with snapshot updates)
+yarn test:typecheck  # TypeScript type checking (tsc)
+yarn test:code       # ESLint
+yarn test            # Vitest (default test runner)
+yarn test:update     # Vitest with snapshot updates (use only when updating snapshots)
 yarn fix             # Auto-fix formatting and linting issues
 ```
 
